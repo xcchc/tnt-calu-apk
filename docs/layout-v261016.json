@@ -1,0 +1,70 @@
+{
+  "version": "261016.1",
+  "apk": "This is Not TNT v261016.1.APK",
+  "built": "2026-10-20",
+  "module": {
+    "lib": "lib/arm64-v8a/libgame_arm64-v8a.so",
+    "runtime_addr_formula": "runtime_addr = module_base + offset",
+    "module_base_from": "/proc/PID/maps 首个 libgame_arm64-v8a.so r--p 00000000 映射起点",
+    "mem_read_channel": "process_vm_readv (tnt_memeat)。/proc/PID/mem 会触发爱加密壳反dump自杀, 禁用",
+    "code_region_rel": ["0xB09000", "0x1588000"],
+    "memory_read_ok": true
+  },
+  "symbols": {
+    "_ZN9SingletonI6ConfigE6s_instE": 14266728,
+    "_ZN22BattleSpritePlayerSelf12syncPositionEv": 21280212,
+    "_ZTV13BattleConsole": 22467976,
+    "_ZTV22BattleSpritePlayerSelf": 22464488,
+    "_ZTV18BattleSpritePlayer": 22463848,
+    "_ZTV12BattlePlayer": 22449080,
+    "_ZN13BattleConsole11updateAngleEb": 21333228,
+    "_ZN13BattleConsole17createActionForceEb": 21315288,
+    "_ZN10BattleWind8setValueEib": 21562732,
+    "_ZN11PanelBattle12setCameraPosERK6QPointb": 20973880,
+    "_ZN11PanelBattle18onZoomScaleChangedEd": 21001120
+  },
+  "symbols_note": "十进制=模块偏移。来源: tnt-calu-apk/tools/mem_symtab.py 从运行时内存镜像提取(28886 符号); 与 v260906.1 旧符号表逐一对照, 旧值全部命中 REVERSE_STATE/battle_helper 已验证地址",
+  "symbols_old_check": {
+    "_ZN9SingletonI6ConfigE6s_instE": "0x1535960 = battle_helper.SINST_CONFIG",
+    "_ZN22BattleSpritePlayerSelf12syncPositionEv": "0x12fa4d4 = REVERSE_STATE 13.22",
+    "_ZTV13BattleConsole": "0x150c080 = battle_helper.VT_BATTLE_CONSOLE",
+    "_ZN10BattleWind8setValueEib": "0x13bf910 = REVERSE_STATE 13.22"
+  },
+  "fields": {
+    "note": "2026-10-20 动态验证(run1/run3/run4 战斗实测, UI 截图对照): 角度/坐标/uid/round/力度零点精确一致; 风字段已证伪 Config+0x470, 转 actions order_data 通道",
+    "BattleConsole": {
+      "can_fire": {"offset": 33, "old": "0x21 u8", "status": "verified_read_works", "note": "实测 0; canfire=1 时刻待捕捉"},
+      "round": {"offset": 40, "old": "0x28 u32", "status": "verified", "evidence": "run3 round=37 / run4 r5..r35 递增, 与 UI 第N回合一致"},
+      "angle_ptr": {"offset": 96, "old": "0x60 -> angle_obj", "angle_val": "angle_obj+0xA0 i32", "status": "verified_weapon_angle", "note": "武器角度(45-78)。盘显值=实际发射角=武器角度+位置修正(实测: 位置(270,807)修正-8, (184,787)修正+3, (148,175)修正0); 解算用实际角度"},
+      "force_ptr": {"offset": 256, "old": "0x100 -> force_obj", "force_val": "force_obj+0x20 f64", "status": "verified", "evidence": "0.0958 == UI 力度条红段 10% (s29 对照)"},
+      "self_ptr": {"offset": 160, "old": "0xA0 -> self_obj", "role_ptr": "self_obj+0xC8 -> role", "status": "verified"},
+      "ctx_ptr": {"offset": 200, "old": "0xC8 -> ctx_obj", "status": "ptr_verified"}
+    },
+    "BattlePlayer": {
+      "role_pos": "role+0x88 x i32, role+0x8C y i32 (世界坐标, 随战斗不同变化)", "status": "verified",
+      "role_uid": "role+0x68 u32 == uid (72143 实测)", "status_uid": "verified",
+      "evidence": "run1 self=148,175 / run3 986,313 / run4 270,807; 单位换算(距)待标定"
+    },
+    "PanelBattle": {
+      "hash_d_ptr": "panel+0x90 -> QHash d", "status": "verified",
+      "hash_layout": "hash_d+8 buckets(u64), +0x14 hsize(u32), +0x20 nbuckets(u32, 质数17)",
+      "node_layout": "node+0x00 next, +0x0c key(uid u32), +0x10 sprite; 链尾 next==hash_d 哨兵",
+      "sprite_role": "sprite+0xC8 -> role",
+      "evidence": "run4 战后下钻: bucket[0] key=72143(=uid) sprite=0x7bbcb0260c70"
+    },
+    "Config": {
+      "wind": {"offset": 1136, "old": "0x470", "status": "REJECTED_not_wind", "evidence": "两场战斗全程恒 69, 与 UI 风 7.0/7.4/7.9/9.5/7.6 均不符; 风待 actions order_data (BattleNotify_Action f4) 通道"}
+    }
+  },
+  "vptr_scan": {
+    "method": "memscan/vptr 扫描: 实例首 qword == module_base + _ZTV + 0x10",
+    "BattleConsole_inst": "module_base + 22467976 + 16",
+    "BattleSpritePlayerSelf_inst": "module_base + 22464488 + 16",
+    "in_battle": "任一命中=战斗中; 全部 0 命中=未进入/已结束(对象销毁, REVERSE_STATE 13.24 铁证)"
+  },
+  "tools": {
+    "mem_read": "tools/tnt_memeat.c (zig cc -target aarch64-linux-musl -O2 -static)",
+    "symbol_extract": "tools/mem_symtab.py",
+    "offset_constants": "tools/core_offsets.py (代码里的唯一来源)"
+  }
+}

@@ -1,0 +1,20 @@
+# 统一换行: 源码与脚本用 LF, Windows 专用的 .ps1 也保持 LF(PS 5.1 能正确处理)
+* text=auto eol=lf
+
+# 二进制(不要让 git 做 CRLF 转换, 否则 APK/ELF 会损坏)
+*.apk   binary
+*.idsig binary
+*.keystore binary
+*.jks   binary
+*.png   binary
+*.jpg   binary
+*.so    binary
+*.dex   binary
+*.bin   binary
+*.pcap  binary
+tools/tnt_memeat binary
+overlay/app/assets/tnt_memeat binary
+
+# Windows 脚本: 保留 CRLF 更保险(记事本/旧工具链)
+*.ps1   text eol=crlf
+*.bat   text eol=crlf

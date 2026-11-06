@@ -1,0 +1,46 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ---- 逆向/采集产物(体积大且可重新生成) ----
+# 运行时内存镜像: 从 module_base 起的连续 VA dump(~24 MB)
+dumps/
+# 校准/探针的采样输出
+out/
+*.bin
+*.so
+*.dex
+*.pcap
+
+# ---- 从设备拉下来的杂项 ----
+*.log
+!docs/*.log
+screenshots/
+shots/
+captures/
+
+# ---- 悬浮层构建产物 ----
+overlay/build/
+overlay/dist/
+*.apk
+*.idsig
+*.keystore
+*.jks
+*.class
+R.java
+
+# ---- 编辑器 / 系统 ----
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 本地环境覆盖 ----
+.env
+*.local
