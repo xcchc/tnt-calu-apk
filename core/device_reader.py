@@ -146,7 +146,7 @@ def ensure_memeat() -> None:
 
 
 def ensure_reverse(local_port: int = 8765, host_port: int = 28080) -> None:
-    """悬浮层连接 127.0.0.1:8765 -> 主机 :28080。"""
+    """悬浮层连接 127.0.0.1:8765 -> 本机 :28080。"""
     serial = ensure_device()
     p = _run(["-s", serial, "reverse", f"tcp:{local_port}", f"tcp:{host_port}"], timeout=10)
     if p.returncode != 0:

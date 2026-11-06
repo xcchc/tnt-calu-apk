@@ -107,9 +107,13 @@ FLY_V0K = 105.64
 FLY_G = 2.28
 FLY_FPS = 30.0
 
-# 力度充电(按住发射键): 实测 force = 0.1940 * 按住秒数 - 0.0294
+# 力度充电(按住发射键): 实测 force = 0.1990 * 按住秒数 - 0.0306
 CHARGE_K = 0.1990
 CHARGE_B = -0.0306
+
+# 游戏里力度可设范围(%)
+MIN_FORCE = 5.0
+MAX_FORCE = 100.0
 
 
 def fly_force_from_hold(hold_s: float) -> float:
@@ -248,8 +252,8 @@ def world_to_rel(self_xy: tuple[float, float], enemy_xy: tuple[float, float], fa
     return dist_ju, height_ju
 
 
-def recommend(dist_ju: float, height_ju: float, wind: float, min_force: float = 5.0,
-              max_force: float = 100.0, angles=None, current: float | None = None):
+def recommend(dist_ju: float, height_ju: float, wind: float, min_force: float = MIN_FORCE,
+              max_force: float = MAX_FORCE, angles=None, current: float | None = None):
     """候选角度力度表。angles 默认取 CANDIDATE_ANGLES(竞技模式 25..55); current=当前盘面角度。"""
     cand = [float(a) for a in (angles if angles is not None else CANDIDATE_ANGLES)]
     out = []
